@@ -7,13 +7,12 @@ namespace Mi.Portafolio.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
         private readonly IRepositorioProyecto _repositorioProyecto;
-
-        public HomeController(ILogger<HomeController> logger, IRepositorioProyecto repositorioProyecto)
+        private readonly IEmailService _emailService;
+        public HomeController(IRepositorioProyecto repositorioProyecto, IEmailService emailService)
         {
-            _logger = logger;
             _repositorioProyecto = repositorioProyecto;
+            _emailService = emailService;
         }
 
         public IActionResult Index()
@@ -22,7 +21,25 @@ namespace Mi.Portafolio.Controllers
             var modelo = new HomeIndexViewModel { Proyectos = proyectos };
             return View(modelo);
         }
-
+        public IActionResult Proyectos()
+        {
+            var proyectos = _repositorioProyecto.ObtenerProyectos();
+            return View(proyectos);
+        }
+        public IActionResult Contacto()
+        {
+            return View();  
+        }
+        [HttpPost]
+        public async Task<IActionResult> Contacto(ContactoViewModel contactoViewModel)
+        {
+            await _emailService.SendEmail(contactoViewModel);
+            return RedirectToAction("Agradecimiento");
+        }
+        public IActionResult Agradecimiento()
+        {
+            return View();
+        }
         public IActionResult Privacy()
         {
             return View();
